@@ -1,0 +1,239 @@
+---
+title: "Data Anaylsis: McNemar's Test"
+output:
+  html_document :
+    theme: flatly
+    toc: FALSE
+---
+
+<br>
+
+---
+
+## Introduction 
+This markdown conducts a McNemar's test for each question and calculates/interprets Cohen's g.
+    
+---
+
+## Required Packages
+The following R packages are required for this script:
+
+* here: for path setting
+* effectsize: for interpreting Cohen's g
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load required packages
+library(here) #to set the path
+library(effectsize) #to interpret Cohen's g
+
+#for reproducibility
+set.seed(123)
+```
+
+---
+
+## Load Data
+Load the data saved in the `raw_data` folder.
+
+```{r load data}
+#define path to data
+data_location <- here::here("data", "processed_data", "processeddata.rds")
+
+#load data
+data <- readRDS(data_location)
+
+```
+
+---
+
+## Data Overview
+Look at the data to ensure variables imported correctly.
+
+```{r data overview}
+#data overview
+summary(data)
+
+```
+
+---
+
+## McNemar's Test for Each Question
+
+```{r McNemar Test}
+#Q1 table
+table(data$Q1_PRE, data$Q1_POST)
+
+#Q1 test
+mcnemar.test(table(data$Q1_PRE, data$Q1_POST), correct = FALSE)
+
+#Q2 table
+table(data$Q2_PRE, data$Q2_POST)
+
+#Q2 test
+mcnemar.test(table(data$Q2_PRE, data$Q2_POST), correct = FALSE)
+
+#Q3 table
+table(data$Q3_PRE, data$Q3_POST)
+
+#Q3 test
+mcnemar.test(table(data$Q3_PRE, data$Q3_POST), correct = FALSE)
+
+#Q4 table
+table(data$Q4_PRE, data$Q4_POST)
+
+#Q4 test
+mcnemar.test(table(data$Q4_PRE, data$Q4_POST), correct = FALSE)
+
+#Q5 table
+table(data$Q5_PRE, data$Q5_POST)
+
+#Q5 test
+mcnemar.test(table(data$Q5_PRE, data$Q5_POST), correct = FALSE)
+
+#Q6 table
+table(data$Q6_PRE, data$Q6_POST)
+
+#Q6 test
+mcnemar.test(table(data$Q6_PRE, data$Q6_POST), correct = FALSE)
+
+#Q7 table
+table(data$Q7_PRE, data$Q7_POST)
+
+#Q7 test
+mcnemar.test(table(data$Q7_PRE, data$Q7_POST), correct = FALSE)
+
+#Q8 table
+table(data$Q8_PRE, data$Q8_POST)
+
+#Q8 test
+mcnemar.test(table(data$Q8_PRE, data$Q8_POST), correct = FALSE)
+
+#Q9 table
+table(data$Q9_PRE, data$Q9_POST)
+
+#Q9 test
+mcnemar.test(table(data$Q9_PRE, data$Q9_POST), correct = FALSE)
+
+#Q10 table
+table(data$Q10_PRE, data$Q10_POST)
+
+#Q10 test
+mcnemar.test(table(data$Q10_PRE, data$Q10_POST), correct = FALSE)
+
+#Q11 table
+table(data$Q11_PRE, data$Q11_POST)
+
+#Q11 test
+mcnemar.test(table(data$Q11_PRE, data$Q11_POST), correct = FALSE)
+
+#Q12 table
+table(data$Q12_PRE, data$Q12_POST)
+
+#Q12 test
+mcnemar.test(table(data$Q12_PRE, data$Q12_POST), correct = FALSE)
+
+#Q13 table
+table(data$Q13_PRE, data$Q13_POST)
+
+#Q13 test
+mcnemar.test(table(data$Q13_PRE, data$Q13_POST), correct = FALSE)
+
+#Q14 table
+table(data$Q14_PRE, data$Q14_POST)
+
+#Q14 test
+mcnemar.test(table(data$Q14_PRE, data$Q14_POST), correct = FALSE)
+```
+
+---
+
+## Cohen's G for Each Question
+```{r cohens g}
+#Q1 cohens g
+effectsize::cohens_g(data$Q1_PRE, data$Q1_POST, ci = 0.95, alternative = "two.sided")
+
+#Q1 interpretation
+effectsize::interpret_cohens_g(0.42)
+
+#Q2 cohens g
+effectsize::cohens_g(data$Q2_PRE, data$Q2_POST, ci = 0.95, alternative = "two.sided")
+
+#Q2 interpretation
+effectsize::interpret_cohens_g(0.45)
+
+#Q3 cohens g
+effectsize::cohens_g(data$Q3_PRE, data$Q3_POST, ci = 0.95, alternative = "two.sided")
+
+#Q3 interpretation
+effectsize::interpret_cohens_g(0.42)
+
+#Q4 cohens g
+effectsize::cohens_g(data$Q4_PRE, data$Q4_POST, ci = 0.95, alternative = "two.sided")
+
+#Q4 interpretation
+effectsize::interpret_cohens_g(0.32)
+
+#Q5 cohens g
+effectsize::cohens_g(data$Q5_PRE, data$Q5_POST, ci = 0.95, alternative = "two.sided")
+
+#Q5 interpretation
+effectsize::interpret_cohens_g(0.23)
+
+#Q6 cohens g
+effectsize::cohens_g(data$Q6_PRE, data$Q6_POST, ci = 0.95, alternative = "two.sided")
+
+#Q6 interpretation
+effectsize::interpret_cohens_g(0.08)
+
+#Q7 cohens g
+effectsize::cohens_g(data$Q7_PRE, data$Q7_POST, ci = 0.95, alternative = "two.sided")
+
+#Q7 interpretation
+effectsize::interpret_cohens_g(0.39)
+
+#Q8 cohens g
+effectsize::cohens_g(data$Q8_PRE, data$Q8_POST, ci = 0.95, alternative = "two.sided")
+
+#Q8 interpretation
+effectsize::interpret_cohens_g(0.46)
+
+#Q9 cohens g
+effectsize::cohens_g(data$Q9_PRE, data$Q9_POST, ci = 0.95, alternative = "two.sided")
+
+#Q9 interpretation
+effectsize::interpret_cohens_g(0.39)
+
+#Q10 cohens g
+effectsize::cohens_g(data$Q10_PRE, data$Q10_POST, ci = 0.95, alternative = "two.sided")
+
+#Q10 interpretation
+effectsize::interpret_cohens_g(0.47)
+
+#Q11 cohens g
+effectsize::cohens_g(data$Q11_PRE, data$Q11_POST, ci = 0.95, alternative = "two.sided")
+
+#Q11 interpretation
+effectsize::interpret_cohens_g(0.30)
+
+#Q12 cohens g
+effectsize::cohens_g(data$Q12_PRE, data$Q12_POST, ci = 0.95, alternative = "two.sided")
+
+#Q12 interpretation
+effectsize::interpret_cohens_g(0.19)
+
+#Q13 cohens g
+effectsize::cohens_g(data$Q13_PRE, data$Q13_POST, ci = 0.95, alternative = "two.sided")
+
+#Q13 interpretation
+effectsize::interpret_cohens_g(0.26)
+
+#Q14 cohens g
+effectsize::cohens_g(data$Q14_PRE, data$Q14_POST, ci = 0.95, alternative = "two.sided")
+
+#Q14 interpretation
+effectsize::interpret_cohens_g(0.38)
+
+```
+

@@ -1,0 +1,184 @@
+---
+title: "Data Anaylsis: Initial Assessment Questions"
+output:
+  html_document :
+    theme: flatly
+    toc: FALSE
+---
+
+<br>
+
+---
+
+## Introduction 
+This markdown imports the Qualtrics data from the initial assessment and generates figures for publication.
+
+<br>
+
+There are two questions in the initial assessment:
+1. Where in Africa were cases of Ebola Virus Disease most prevalent during the recent outbreak?
+2. How many people are known to have contracted Ebola Virus Disease while in the United States?
+
+<br>
+
+The first question was a heat map, so we can only use the standard Qualtrics output. But, we can make a customized chart for Q2.
+---
+
+## Required Packages
+The following R packages are required for this script:
+
+* here: for path setting
+* tidyverse: for using all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load required packages
+library(here) #to set the path
+library(tidyverse) #to use all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+
+```
+
+---
+
+## Load Data
+Load the data saved in the `raw_data` folder.
+
+```{r load data}
+#define path to data
+data_location <- here::here("data", "processed_data", "InitialAssessmentData_ALL.csv")
+
+#load data
+initial_data <- read.csv(data_location)
+
+```
+
+---
+
+## Data Overview
+Look at the data to ensure variables imported correctly.
+
+```{r data overview}
+#data overview
+summary(initial_data)
+
+```
+
+The `EVD_Guess` imported as a character variable, so we need to fix it to be a numeric variable.
+
+---
+
+## Data Transformation
+Using `table(initial_data$EVD_guess)`, we can see the following values need to be adjusted:
+
+* 50,000: remove the comma
+* None: change to 0
+* blank: change to `NA`
+
+
+```{r data transformation}
+#fix 50,000
+initial_data$EVD_Guess[initial_data$EVD_Guess == "50,000"] <- 50000
+
+#fix none
+initial_data$EVD_Guess[initial_data$EVD_Guess == "None"] <- 0
+
+#fix blanks
+initial_data$EVD_Guess[initial_data$EVD_Guess == ""] <- NA
+
+#convert to numeric
+initial_data$EVD_Guess <- as.numeric(initial_data$EVD_Guess)
+
+```
+
+---
+
+## Summary Stats
+Generate summary statistics for EVD guess.
+
+```{r summary stats}
+#summary
+summary(initial_data$EVD_Guess)
+
+#mean
+mean(initial_data$EVD_Guess, na.rm = TRUE)
+
+#sd
+sd(initial_data$EVD_Guess, na.rm = TRUE)
+```
+
+---
+
+## Outlier Adjustment
+Remove the `50000` datapoint as it is an extreme outlier.
+```{r outlier adjustment}
+#remove outlier (this also removes NAs)
+data_adj <- subset(initial_data, EVD_Guess < 50000)
+
+#summary
+summary(data_adj$EVD_Guess)
+
+#mean
+mean(data_adj$EVD_Guess)
+
+#sd
+sd(data_adj$EVD_Guess)
+```
+
+---
+
+## Figure
+Create figure for EVD guesses.
+
+Also need to convert to categories to make it more comprehensible:
+
+0 people
+1 person
+2 people
+3 people
+4 people
+5 people
+6 - 10 people
+11 - 50 people
+51 - 100 people
+More than 100 people
+
+```{r EVD guess figure}
+#convert to categorical
+data_adj$guess_cat <- cut(data_adj$EVD_Guess,
+                          breaks = c(-1, 0.9, 1.9, 2.9, 3.9, 4.9, 5, 10, 50, 100, 5000),
+                          labels = c("0", "1", "2", "3", "4", "5", "6 - 10", "11 - 50", "51 - 100", ">100"))
+
+#create plot that includes both count and percentage of guesses
+guess_plot <- data_adj %>%
+                  dplyr::count(guess_cat) %>%
+                  dplyr::mutate(perc = round(proportions(n) * 100, 1),
+                                res = stringr::str_c(n, " (", perc, "%)"),
+                                guess_cat = as.factor(guess_cat)) %>%
+                  ggplot2::ggplot(mapping = aes(x = guess_cat, y = n)) +
+                           geom_col(fill = "#6F99AD") +
+                           geom_text(aes(label = res), 
+                                     vjust = -0.5,
+                                     family = "serif",
+                                     size = 3.5) +
+                           scale_x_discrete(expand = c(0,0)) +
+                           scale_y_continuous(expand = c(0,0),
+                                              limits = c(0, 215)) +
+                           labs(x = "\nEstimated Number of People Who Contracted EVD in US",
+                                y = "Number of Participants\n") +
+                           theme_classic() +
+                           theme(text = element_text(family = "serif"),
+                                 axis.text = element_text(color = "black", size = 11),
+                                 axis.title = element_text(face = "bold", size = 12),
+                                 legend.position = "none")
+
+guess_plot
+
+#save file
+guess_plot_file <- here::here("results", "Figure_2.png")
+
+ggplot2::ggsave(guess_plot_file, width = 9, height = 5.5, dpi = 300, units = "in", device = "png")
+
+```
+

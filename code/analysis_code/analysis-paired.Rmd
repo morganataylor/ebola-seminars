@@ -1,0 +1,176 @@
+---
+title: "Data Anaylsis: Paired T-Test"
+output:
+  html_document :
+    theme: flatly
+    toc: FALSE
+---
+
+<br>
+
+---
+
+## Introduction 
+This markdown conducts a paired sample t-test for the overall score as well as for the groups of questions.
+    
+---
+
+## Required Packages
+The following R packages are required for this script:
+
+* here: for path setting
+* tidyverse: for using all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+* effectsize: for interpreting Cohen's g
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load required packages
+library(here) #to set the path
+library(tidyverse) #to use all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+library(effectsize) #to interpret Cohen's g
+
+#for reproducibility
+set.seed(123)
+```
+
+---
+
+## Load Data
+Load the data saved in the `raw_data` folder.
+
+```{r load data}
+#define path to data
+data_location <- here::here("data", "processed_data", "processeddata.rds")
+
+#load data
+data <- readRDS(data_location)
+
+```
+
+---
+
+## Data Overview
+Look at the data to ensure variables imported correctly.
+
+```{r data overview}
+#data overview
+summary(data)
+
+```
+
+---
+
+## Transform Data
+We need to calculate the sums of the relevant categories:
+
+Ebola 101: Q1 - Q3
+EVD Monitoring: Q4 - Q6
+The Infectious Disease Network: Q7 - Q10
+
+```{r transform data}
+#ebola 101
+data$Ebola_PRE <- ((data$Q1_PRE + data$Q2_PRE + data$Q3_PRE)/3)*100
+data$Ebola_POST <- ((data$Q1_POST + data$Q2_POST + data$Q3_POST)/3)*100
+
+#evd monitoring
+data$EVD_PRE <- ((data$Q4_PRE + data$Q5_PRE + data$Q6_PRE)/3)*100
+data$EVD_POST <- ((data$Q4_POST + data$Q5_POST + data$Q6_POST)/3)*100
+
+#IDN
+data$IDN_PRE <- ((data$Q7_PRE + data$Q8_PRE + data$Q9_PRE + data$Q10_PRE)/4)*100
+data$IDN_POST <- ((data$Q7_POST + data$Q8_POST + data$Q9_POST + data$Q10_POST)/4)*100
+
+#convert score into percent
+data$SCORE_PRE_PCT <- (data$SCORE_PRE/14)*100
+data$SCORE_POST_PCT <- (data$SCORE_POST/14)*100
+```
+
+---
+
+## Summary Stats
+To calculate the mean and SD for each group of scores.
+```{r summary stats}
+#total score - pre
+mean(data$SCORE_PRE_PCT)
+sd(data$SCORE_PRE_PCT)
+
+#total score - post
+mean(data$SCORE_POST_PCT)
+sd(data$SCORE_POST_PCT)
+
+#ebola 101 - pre
+mean(data$Ebola_PRE)
+sd(data$Ebola_PRE)
+
+#ebola 101 - post
+mean(data$Ebola_POST)
+sd(data$Ebola_POST)
+
+#evd monitoring - pre
+mean(data$EVD_PRE)
+sd(data$EVD_PRE)
+
+#evd monitoring - post
+mean(data$EVD_POST)
+sd(data$EVD_POST)
+
+#idn - pre
+mean(data$IDN_PRE)
+sd(data$IDN_PRE)
+
+#idn - post
+mean(data$IDN_POST)
+sd(data$IDN_POST)
+
+```
+
+---
+
+## Paired t-test
+
+```{r paired t test}
+#overall score
+t.test(data$SCORE_PRE_PCT, data$SCORE_POST_PCT, paired = TRUE)
+
+#ebola 101
+t.test(data$Ebola_PRE, data$Ebola_POST, paired = TRUE)
+
+#evd monitoring
+t.test(data$EVD_PRE, data$EVD_POST, paired = TRUE)
+
+#idn
+t.test(data$IDN_PRE, data$IDN_POST, paired = TRUE)
+
+```
+
+---
+
+## Cohen's d for Each Question
+```{r cohens d}
+#overall score cohens d
+effectsize::cohens_d(data$SCORE_PRE_PCT, data$SCORE_POST_PCT, ci = 0.95, alternative = "two.sided", paired = TRUE)
+
+#overall score interpretation
+effectsize::interpret_cohens_d(-1.44)
+
+#ebola 101 cohens d
+effectsize::cohens_d(data$Ebola_PRE, data$Ebola_POST, ci = 0.95, alternative = "two.sided", paired = TRUE)
+
+#ebola 101 interpretation
+effectsize::interpret_cohens_d(-0.93)
+
+#evd monitoring cohens d
+effectsize::cohens_d(data$EVD_PRE, data$EVD_POST, ci = 0.95, alternative = "two.sided", paired = TRUE)
+
+#evd monitoring interpretation
+effectsize::interpret_cohens_d(-0.49)
+
+#idn cohens d
+effectsize::cohens_d(data$IDN_PRE, data$IDN_POST, ci = 0.95, alternative = "two.sided", paired = TRUE)
+
+#idn interpretation
+effectsize::interpret_cohens_d(-1.29)
+```
+
+

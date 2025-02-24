@@ -1,0 +1,115 @@
+---
+title: "Quizdom Data Processing"
+output:
+  html_document :
+    theme: flatly
+    toc: FALSE
+---
+
+<br>
+
+---
+
+## Introduction 
+This markdown conducts the data processing to prepare the Quizdom data for analysis.
+    
+    
+The data processing will follow these steps:
+1. Import graded dataframes for pre/post tests
+2. Filter out participants who did not answer more than half of either the pre-test or post-test questions
+3. Combine the pre/post-test data based on Participant ID & Region
+4. Save processed dataset as .rds
+
+---
+
+## Required Packages
+The following R packages are required for this script:
+
+* here: for path setting
+* readxl: for importing Excel data
+* skimr: for data summarization
+* tidyverse: for using all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+
+```{r libraries, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#load required packages
+library(here) #to set the path
+library(readxl) # to import Excel data
+library(skimr) #to summarize data
+library(tidyverse) #to use all packages in the Tidyverse for data wrangling (ggplot2, dplyr, tidyr, readr, purr, tibble, stringr, and forcats)
+```
+
+---
+
+## Load Data
+Load the data saved in the `raw_data` folder.
+
+```{r load data}
+#define path to data
+pre_location <- here::here("data", "raw_data", "Compiled_Pre_Data.xlsx")
+post_location <- here::here("data", "raw_data", "Compiled_Post_Data.xlsx")
+
+#load data
+pre <- readxl::read_xlsx(pre_location, sheet = "Graded")
+post <- readxl::read_xlsx(post_location, sheet = "Graded")
+
+```
+
+---
+
+## Data Overview
+Look at the data to ensure variables imported correctly.
+
+```{r data overview}
+#pre
+summary(pre)
+
+#post
+summary(post)
+```
+
+---
+
+## Filter Incomplete Responses
+Filter out participants who did not answer more than half of either the pre-test or post-test questions
+
+```{r filter incomplete responses}
+#set threshold for a 50% cut-off
+threshold <- 0.5 
+
+#filter pre
+pre_filtered <- pre %>%
+                  dplyr::rowwise() %>%
+                  dplyr::filter(sum(is.na(dplyr::c_across(Q1_PRE:Q14_PRE))) / length(dplyr::c_across(Q1_PRE:Q14_PRE)) <= threshold)
+
+#filter post
+post_filtered <- post %>%
+                  dplyr::rowwise() %>%
+                  dplyr::filter(sum(is.na(dplyr::c_across(Q1_POST:Q14_POST))) / length(dplyr::c_across(Q1_POST:Q14_POST)) <= threshold)
+```
+
+---
+
+## Combined Dataframes
+Combine the pre and post dataframes into one, based on `ParticipantID` and `Region`.
+
+```{r combine dataframes}
+#combine using an inner join to only include matched rows
+data_all <- dplyr::inner_join(pre_filtered, post_filtered, by = c("Region", "ParticipantID"))
+
+#replace NAs with 0
+data_all <- replace(data_all, is.na(data_all), 0)
+```
+
+--
+
+## Save Processed Data
+Save the processed data to be referenced in subsequent analyses.
+```{r save processed data}
+#location to save file
+data_location_save <- here::here("data", "processed_data", "processeddata.rds")
+
+#save data as RDS
+saveRDS(data_all, data_location_save)
+```
